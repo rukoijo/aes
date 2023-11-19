@@ -153,17 +153,40 @@ def KeyExpansion(key):
 
 def SubBytes(state):
     """Apply the AES S-box to each element in the state. Write the data into a new state"""
+    
+    print("------ before SubBytes------")
+    print_state(state)
+    
     new_state = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+    for row in range(4):
+        for column in range(4):
+            #extract the byte value from the state and apply the S-box
+            new_state[row][column] = Sbox[state[row][column]]
+    
+    print("------ after SubBytes------")
+    print_state(new_state)
     
     return new_state
+
 
 
 def ShiftRows(state):
     """Shift the rows of the state according the rule for AES ShiftRows. 
     Row i is circular shifted i steps to the left.
     Write the data into a new state"""
+    
+    print("------ before ShiftRows------")
+    print_state(state)
+    
     new_state = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-   
+    for row in range(4):
+        for column in range(4):
+            # perform the circular shift operation
+            new_state[row][column] = state[row][(column+row)%4]
+    
+    print("------ after ShiftRows------")
+    print_state(new_state)
+
     return new_state
 
 
@@ -185,8 +208,19 @@ def AddRoundKey(state,rKey,round):
     """ Add the roundkeys for round r to the state. Note! In each round we use 4 separete roundkeys
     rKey[4*r], rKey[4*r+1], rKey[4*r+2], rKey[4*r+2]. Furthermore, the roundkeys are added to the 
     columns of the state"""
-    new_state = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
     
+    print("------ before AddRoundKey------")
+    print_state(state)
+
+    new_state = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+    for row in range(4):
+        for column in range(4):
+            # XOR the state with the roundkey
+            new_state[row][column] = state[row][column] ^ rKey[4*round + column][row]
+    
+    print("------ after AddRoundKey------")
+    print_state(new_state)  
+   
     return new_state
 
 
