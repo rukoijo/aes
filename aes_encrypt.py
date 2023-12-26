@@ -43,11 +43,14 @@ def aes_ecb(data, key):
     plaintext = pad(data)
 
     #initiate aes by calculating the roundkeys
-    
+    roundKeys = aes.KeyExpansion(key)
 
     # encrypt each block of data and store in ciphertext
     ciphertext = []
-    
+    for i in range(0, len(plaintext), 16):
+        block = plaintext[i:i + 16]
+        encrypted_block = aes.aes_encrypt(block, roundKeys)
+        ciphertext.extend(encrypted_block)
     return ciphertext
 
 def aes_cbc(data, key, iv):
@@ -65,7 +68,14 @@ def aes_cbc(data, key, iv):
     # for the first block xor with the IV
 
     ciphertext = []
-    
+    for i in range(0, len(plaintext), 16):
+        block = plaintext[i:i + 16]
+        if i == 0:
+            block_xor = [a ^ b for a, b in zip (block, iv)]
+        else:
+            block_xor = [a ^ b for a, b in zip (block, ciphertext[i-16:i])]
+        encrypted_block = aes.aes_encrypt(block_xor, roundKeys)
+        ciphertext.extend(encrypted_block)
     return ciphertext
 
 
@@ -83,10 +93,25 @@ def aes_ctr(data, key, ctr):
     # then add 1 to the counter and encrypt the counter again to produce more keystream bytes
     # repeat until you have enough keystream
     keystream = []
+    for i in range(0, len(data), 16):
+        block = aes.aes_encrypt(ctr, roundkeys)
+        keystream.extend(block)
+        ctr[-1] += 1
+    
+    print("-- keystream -- ")
+    print(len(data))
+    print(keystream)
+    print("---------- ")
 
     # encrypt each byte of the data with keystream
-    ciphertext = data.copy()
+    # to encrypt a byte xor the byte with the keystream byte of the same index
+    # the result is the ciphertext byte
 
+    ciphertext = []
+    # ciphertext = data.copy()
+    for i in range(len(data)):
+        ciphertext.append(data[i] ^ keystream[i])
+    
     return ciphertext
 
 

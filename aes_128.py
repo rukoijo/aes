@@ -154,8 +154,8 @@ def KeyExpansion(key):
 def SubBytes(state):
     """Apply the AES S-box to each element in the state. Write the data into a new state"""
     
-    print("------ before SubBytes------")
-    print_state(state)
+    # print("------ before SubBytes------")
+    # print_state(state)
     
     new_state = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
     for row in range(4):
@@ -163,8 +163,8 @@ def SubBytes(state):
             #extract the byte value from the state and apply the S-box
             new_state[row][column] = Sbox[state[row][column]]
     
-    print("------ after SubBytes------")
-    print_state(new_state)
+    # print("------ after SubBytes------")
+    # print_state(new_state)
     
     return new_state
 
@@ -175,8 +175,8 @@ def ShiftRows(state):
     Row i is circular shifted i steps to the left.
     Write the data into a new state"""
     
-    print("------ before ShiftRows------")
-    print_state(state)
+    # print("------ before ShiftRows------")
+    # print_state(state)
     
     new_state = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
     for row in range(4):
@@ -184,8 +184,8 @@ def ShiftRows(state):
             # perform the circular shift operation
             new_state[row][column] = state[row][(column+row)%4]
     
-    print("------ after ShiftRows------")
-    print_state(new_state)
+    # print("------ after ShiftRows------")
+    # print_state(new_state)
 
     return new_state
 
@@ -209,8 +209,8 @@ def AddRoundKey(state,rKey,round):
     rKey[4*r], rKey[4*r+1], rKey[4*r+2], rKey[4*r+2]. Furthermore, the roundkeys are added to the 
     columns of the state"""
     
-    print("------ before AddRoundKey------")
-    print_state(state)
+    # print("------ before AddRoundKey------")
+    # print_state(state)
 
     new_state = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
     for row in range(4):
@@ -218,8 +218,8 @@ def AddRoundKey(state,rKey,round):
             # XOR the state with the roundkey
             new_state[row][column] = state[row][column] ^ rKey[4*round + column][row]
     
-    print("------ after AddRoundKey------")
-    print_state(new_state)  
+    # print("------ after AddRoundKey------")
+    # print_state(new_state)  
    
     return new_state
 
