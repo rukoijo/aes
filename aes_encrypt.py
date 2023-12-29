@@ -3,6 +3,7 @@ the AES algorithm.
 The module aes_128 provides the actual implementation of the algorithms.  
 """
 import aes_128 as aes
+import os
 
 # In the lab you should modify aes_ecb, aes_cbc and aes_ctr such that they work according to the specification of the modes
 # Do not modify pad and unpad
@@ -98,10 +99,10 @@ def aes_ctr(data, key, ctr):
         keystream.extend(block)
         ctr[-1] += 1
     
-    print("-- keystream -- ")
-    print(len(data))
-    print(keystream)
-    print("---------- ")
+    # print("-- keystream -- ")
+    # print(len(data))
+    # print(keystream)
+    # print("---------- ")
 
     # encrypt each byte of the data with keystream
     # to encrypt a byte xor the byte with the keystream byte of the same index
@@ -114,6 +115,63 @@ def aes_ctr(data, key, ctr):
     
     return ciphertext
 
+def encrypt_mac(data,key):
+    """"input parameters: data and key. output parameters: IV, counter, ciphertext, mac is calculated from cbc mode and appended to the data. encryption
+    is done in counter mode."""
+    #randomly generate IV and counter
+    iv = list(os.urandom(16))
+    ctr = list(os.urandom(16))
+
+    #encrypt message with cbc and extract mac
+    cbc_ciphertext = aes_cbc(data, key, iv)
+    #mac is the last block of the cbc_ciphertext
+    mac = cbc_ciphertext[-16:]
+
+    #append mac to data to get mac+data=plaintext
+    data = data.copy()
+    data.extend(mac)
+    plaintext = data.copy()
+
+    #Encrypt again but now in counter  mode. The output will be the ciphertext that should be transmitted to the receiver
+    ctr_ciphertext = aes_ctr(plaintext, key, ctr.copy())
+
+    # output IV, Counter and Ciphertext.
+    # print("key =>", key)
+    print("IV =>", iv)
+    print("counter =>", ctr)
+    # print("mac(cbc) =>", mac)
+    # print("plaintext(mac+data) =>", plaintext)
+    print("ciphertext =>", ctr_ciphertext)
+
+    return iv,ctr,ctr_ciphertext
+
+def decrypt_mac(iv,ctr,ciphertext,key):
+    """decrypts ciphertext and verifies mac. input parameters: ciphertext, key, iv, ctr. output parameters: plaintext, mac(original), mac_2(calculated), mac_status."""
+    #decrypt ciphertext with counter mode because it was encrypted with counter mode
+    # print("ctr = ",ctr)
+    decrypted_data = aes_ctr(ciphertext, key, ctr)
+    # print("key =>", key)
+    # print("plaintext(mac+data) =>", decrypted_data)
+
+    #extract mac from decrypted_data
+    mac = decrypted_data[-16:]
+    # print("mac =>", mac)
+
+    #extract plaintext from decrypted_data
+    plaintext = decrypted_data[:-16]
+    # print("plaintext =>", plaintext)
+
+    #Calculate MAC using the extracted plaintext, key, and IV
+    mac_2 = aes_cbc(plaintext, key, iv)[-16:]
+    print("calculated mac =>", mac_2)
+
+    #Check if the calculated MAC matches the extracted MAC
+    if mac == mac_2:
+        print("mac valid =>", True)
+    else:
+        print("mac valid =>", False)
+
+    return plaintext
 
 if __name__ == '__main__':
     """If the module is run as a script print a message on how to use the module"""
